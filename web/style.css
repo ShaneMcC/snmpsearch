@@ -77,3 +77,11 @@ div.controls p {
 .box .centered {
 	text-align: center;
 }
+
+span.yes {
+	color: #050;
+}
+
+span.no {
+	color: #500;
+}
