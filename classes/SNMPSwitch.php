@@ -161,6 +161,7 @@ class SNMPSwitch {
 		}
 
 		$result['switch'] = $this->getDetails();
+		$result['mac'] = $mac;
 
 		snmp_set_valueretrieval($oldsnmp);
 		return $result;

@@ -1,11 +1,11 @@
 <?php
 	function displayResult($result) {
 		if ($result['port'] === false) {
-			echo '<span class="no">The requested MAC address <strong>', $mac, '</strong> was not found on <strong>', $result['switch']['name'], '</strong></span><br>';
+			echo '<span class="no">The requested MAC address <strong>', $result['mac'], '</strong> was not found on <strong>', $result['switch']['name'], '</strong></span><br>';
 		} else {
-			echo '<span class="yes">The requested MAC address <strong>', $mac, '</strong> was found on <strong>', $result['switch']['name'], '</strong> on port <strong>', $result['port']['name'], ' (', $result['port']['calculateddesc'], ')</strong></span><br>';
+			echo '<span class="yes">The requested MAC address <strong>', $result['mac'], '</strong> was found on <strong>', $result['switch']['name'], '</strong> on port <strong>', $result['port']['name'], ' (', $result['port']['calculateddesc'], ')</strong></span><br>';
 
-			searchSwitches(findExtraSwitches($result));
+			searchSwitches(findExtraSwitches($result), $result['mac']);
 		}
 	}
 
