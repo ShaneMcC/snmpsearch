@@ -23,4 +23,19 @@
 	if (file_exists(dirname(__FILE__) . '/config.local.php')) {
 		require_once(dirname(__FILE__) . '/config.local.php');
 	}
+
+	if (!function_exists('findExtraSwitches')) {
+		/**
+		 * This function allows site-specific parsing of a MAC search result
+		 * to see if there are other switches that should be looked at based on
+		 * the ports that can see the mac.
+		 *
+		 * @param $result The result array from SNMPSwitch's findMac method.
+		 * @return FALSE if there is nowhere else to look, else an array of
+		 *         switches in the same format as $defaultswitches.
+		 */
+		function findExtraSwitches($result) {
+			return FALSE;
+		}
+	}
 ?>
