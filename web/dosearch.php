@@ -1,8 +1,4 @@
 <?php
-	$mac = $_REQUEST['mac'];
-
-	echo '<h2>Search Results</h2>';
-
 	function displayResult($result) {
 		if ($result['port'] === false) {
 			echo '<span class="no">The requested MAC address <strong>', $mac, '</strong> was not found on <strong>', $result['switch']['name'], '</strong></span><br>';
@@ -13,7 +9,7 @@
 		}
 	}
 
-	function searchSwitches($switches) {
+	function searchSwitches($switches, $mac) {
 		global $defaultcommunity;
 
 		if (!is_array($switches)) { return; }
@@ -39,5 +35,6 @@
 		}
 	}
 
-	searchSwitches($defaultswitches);
+	echo '<h2>Search Results</h2>';
+	searchSwitches($defaultswitches, $_REQUEST['mac']);
 ?>
