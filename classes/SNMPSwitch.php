@@ -160,6 +160,10 @@ class SNMPSwitch {
 			$result['port'] = $this->getPortDetails($result['port']);
 		}
 
+		// TODO: Some switches don't implement the above, so we need to use
+		//       1.3.6.1.2.1.17.7.1.2.2.1.2 - but this is a per-vlan table
+		//       which is going to be a bit horrible on larger devices...
+
 		$result['switch'] = $this->getDetails();
 		$result['mac'] = $mac;
 
