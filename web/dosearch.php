@@ -10,14 +10,17 @@
 	}
 
 	function searchSwitches($switches, $mac) {
-		global $defaultcommunity;
+		global $defaultcommunity, $searchedSwitches;
 
 		if (!is_array($switches)) { return; }
+		if (!isset($searchedSwitches[$mac])) { $searchedSwitches[$mac] = array(); }
 
 		foreach ($switches as $switch) {
 			$bits = explode('=', $switch, 2);
 			$switch = $bits[0];
 			$community = isset($bits[1]) ? $bits[1] : $defaultcommunity;
+
+			if (in_array($switch, $searchedSwitches[$mac])) { continue; } else { $searchedSwitches[$mac][] = $switch; }
 
 			$switch = new SNMPSwitch($switch, $community);
 			$result = $switch->findMac($mac);
@@ -28,10 +31,6 @@
 			}
 
 			displayResult($result);
-
-			/* echo '<pre>';
-			var_dump($result);
-			echo '</pre>'; */
 		}
 	}
 
