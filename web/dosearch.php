@@ -10,7 +10,7 @@
 	}
 
 	function searchSwitches($switches, $mac) {
-		global $defaultcommunity, $searchedSwitches;
+		global $defaultcommunity, $searchedSwitches, $cleverFindExtra;
 
 		if (!is_array($switches)) { return; }
 		if (!isset($searchedSwitches[$mac])) { $searchedSwitches[$mac] = array(); }
@@ -31,6 +31,7 @@
 			}
 
 			displayResult($result);
+			if ($result['port'] !== false && $cleverFindExtra && is_array(findExtraSwitches($result))) { return; }
 		}
 	}
 

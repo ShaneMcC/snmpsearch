@@ -19,6 +19,15 @@
 	 */
 	$defaultcommunity = 'private';
 
+	/**
+	 * If enabled, web search will ignore any further switches in it's list
+	 * after finding a port that has an extra switch attached to it.
+	 *
+	 * This works best if the STP Root is the first switch in the list, and
+	 * prevents un-needed searches on other default switches.
+	 */
+	$cleverFindExtra = false;
+
 	// Load in local config if it exists.
 	if (file_exists(dirname(__FILE__) . '/config.local.php')) {
 		require_once(dirname(__FILE__) . '/config.local.php');
