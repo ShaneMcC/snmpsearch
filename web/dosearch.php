@@ -36,5 +36,21 @@
 	}
 
 	echo '<h2>Search Results</h2>';
-	searchSwitches($defaultswitches, $_REQUEST['mac']);
+
+	$mac = isset($_REQUEST['mac']) ? $_REQUEST['mac'] : FALSE;
+	if (filter_var($mac, FILTER_VALIDATE_IP)) {
+		$result = ip2mac($defaultrouters, $mac);
+
+		if ($result !== false) {
+			$result[1] = join(':', str_split($result[1], 2));
+			echo 'Found MAC Address ', $result[1], ' for IP ', $mac, ' on ', $result[0], '<br>';
+			$mac = $result[1];
+		} else {
+			$mac = FALSE;
+		}
+	}
+
+	if ($mac !== FALSE) {
+		searchSwitches($defaultswitches, $mac);
+	}
 ?>

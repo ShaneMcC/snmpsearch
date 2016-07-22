@@ -15,6 +15,19 @@
 	                        );
 
 	/**
+	 * Array of routers to check for mapping IP address to MAC Address.
+	 *
+	 * Format for each line is: <router name/ip>[=community string].
+	 *
+	 * If no community string is specified, then the value of
+	 * $defaultcommunity is assumed.
+	 *
+	 * If this array is empty, IP to MAC mapping is not enabled.
+	 */
+	$defaultrouters = array('defaultrouter@10.0.0.1=public',
+	                       );
+
+	/**
 	 * Default community string to use if one is not specified.
 	 */
 	$defaultcommunity = 'private';

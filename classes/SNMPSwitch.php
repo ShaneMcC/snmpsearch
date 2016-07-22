@@ -147,6 +147,8 @@ class SNMPSwitch {
 	 */
 	function getLLDPPorts() {
 		$result = array();
+		$oldsnmp = snmp_get_valueretrieval();
+		@snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 		@snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
 		$walk = @snmprealwalk($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.5.0');
 		foreach ($walk as $oid => $val) {
@@ -155,6 +157,7 @@ class SNMPSwitch {
 			}
 		}
 
+		@snmp_set_valueretrieval($oldsnmp);
 		return $result;
 	}
 
@@ -164,6 +167,8 @@ class SNMPSwitch {
 	 * @return Array of switch information.
 	 */
 	function getRemoteLLDPDetails($portid) {
+		$oldsnmp = snmp_get_valueretrieval();
+		@snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 		$result = array();
 		$result['hostname'] = $this->host;
 
@@ -178,6 +183,7 @@ class SNMPSwitch {
 		$result['lldpRemSysCapSupported'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.11.0.' . $portid . '.1');
 		$result['lldpRemSysCapEnabled'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.12.0.' . $portid . '.1');
 
+		@snmp_set_valueretrieval($oldsnmp);
 		return $result;
 	}
 
@@ -188,6 +194,9 @@ class SNMPSwitch {
 	 * @return Array of switch information.
 	 */
 	function getAllLLDPData() {
+		$oldsnmp = snmp_get_valueretrieval();
+		@snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
+
 		$result = array();
 		$result['hostname'] = $this->host;
 		$result['lldpLocChassisId'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.3.2.0');
@@ -256,6 +265,7 @@ class SNMPSwitch {
 			}
 		}
 
+		@snmp_set_valueretrieval($oldsnmp);
 		return $result;
 	}
 
@@ -289,6 +299,43 @@ class SNMPSwitch {
 		snmp_set_valueretrieval($oldsnmp);
 		return $result;
 	}
+
+	/**
+	 * Convert a given IP address to MAC if this device knows it.
+	 *
+	 * @param $ip IP addresss
+	 * @return MAC Address if known.
+	 */
+	function ip2mac($ip) {
+		if (!filter_var($ip, FILTER_VALIDATE_IP)) { return FALSE; }
+		$oldsnmp = snmp_get_valueretrieval();
+		snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
+		snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
+
+		// ntop then pton to compress v6
+		$wantedIP = inet_ntop(inet_pton($ip));
+
+		$walk = snmprealwalk($this->host, $this->community, '1.3.6.1.2.1.4.35.1.4');
+		foreach ($walk as $oid => $val) {
+			if (preg_match('#\.1\.3\.6\.1\.2\.1\.4\.35\.1\.4\.([0-9]+)\.([0-9]+)\.[0-9]+\.([0-9.]+)#', $oid, $m)) {
+				$portID = $m[1];
+				$ipVersion = $m[2];
+
+				$ipAddr = '';
+				foreach (explode('.', $m[3]) as $bit) { $ipAddr .= chr($bit); }
+				$ipAddr = strtolower(inet_ntop($ipAddr));
+
+				if ($ipAddr == $wantedIP) {
+					$result = bin2hex($val);
+					break;
+				}
+			}
+		}
+
+		@snmp_set_valueretrieval($oldsnmp);
+		return $result;
+	}
 }
 
-?>
+
+
