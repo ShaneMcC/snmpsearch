@@ -308,6 +308,7 @@ class SNMPSwitch {
 	 */
 	function ip2mac($ip) {
 		if (!filter_var($ip, FILTER_VALIDATE_IP)) { return FALSE; }
+		$result = FALSE;
 		$oldsnmp = snmp_get_valueretrieval();
 		snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 		snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
