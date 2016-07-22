@@ -326,7 +326,7 @@ class SNMPSwitch {
 				foreach (explode('.', $m[3]) as $bit) { $ipAddr .= chr($bit); }
 				$ipAddr = strtolower(inet_ntop($ipAddr));
 
-				if ($ipAddr == $wantedIP) {
+				if ($ipAddr == $wantedIP && !empty($val)) {
 					$result = bin2hex($val);
 					break;
 				}

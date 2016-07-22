@@ -26,7 +26,7 @@
 			$result = $switch->findMac($mac);
 
 			if ($result === false) {
-				echo 'There was an error with the mac address provided.';
+				echo '<span class="no">There was an error with the mac address provided.</span><br>';
 				break;
 			}
 
@@ -46,9 +46,11 @@
 			echo '<span class="meh" style="font-style: italic">Found MAC Address <strong>', $result[1], '</strong> for IP <strong>', $mac, '</strong> on <strong>', $result[0], '</strong></span><br>';
 			$mac = $result[1];
 		} else {
+			echo '<span class="no" style="font-style: italic">Unable to find MAC Address for IP <strong>', $mac, '</strong></span><br>';
 			$mac = FALSE;
 		}
 	}
+	$_REQUEST['mac'] = $mac;
 
 	if ($mac !== FALSE) {
 		searchSwitches($defaultswitches, $mac);
