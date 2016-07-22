@@ -141,6 +141,125 @@ class SNMPSwitch {
 	}
 
 	/**
+	 * Get LLDP port IDs
+	 *
+	 * @return Array of Port IDs that have LLDP Info.
+	 */
+	function getLLDPPorts() {
+		$result = array();
+		@snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
+		$walk = @snmprealwalk($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.5.0');
+		foreach ($walk as $oid => $val) {
+			if (preg_match('#\.8802\.1\.1\.2\.1\.4\.1\.1\.5\.0\.([0-9]+)\.1#', $oid, $m)) {
+				$result[] = $m[1];
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get LLDP info for a port.
+	 *
+	 * @return Array of switch information.
+	 */
+	function getRemoteLLDPDetails($portid) {
+		$result = array();
+		$result['hostname'] = $this->host;
+
+		$result['lldpLocPortDesc'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.3.7.1.4.' . $portid);
+		$result['lldpRemChassisIdSubtype'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.4.0.' . $portid . '.1');
+		$result['lldpRemChassisId'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.5.0.' . $portid . '.1');
+		$result['lldpRemPortIdSubtype'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.6.0.' . $portid . '.1');
+		$result['lldpRemPortId'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.7.0.' . $portid . '.1');
+		$result['lldpRemPortDesc'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.8.0.' . $portid . '.1');
+		$result['lldpRemSysName'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.9.0.' . $portid . '.1');
+		$result['lldpRemSysDesc'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.10.0.' . $portid . '.1');
+		$result['lldpRemSysCapSupported'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.11.0.' . $portid . '.1');
+		$result['lldpRemSysCapEnabled'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1.12.0.' . $portid . '.1');
+
+		return $result;
+	}
+
+
+	/**
+	 * Get LLDP info for a port.
+	 *
+	 * @return Array of switch information.
+	 */
+	function getAllLLDPData() {
+		$result = array();
+		$result['hostname'] = $this->host;
+		$result['lldpLocChassisId'] = @snmpget($this->host, $this->community, '1.0.8802.1.1.2.1.3.2.0');
+		$result['ports'] = array();
+
+		$snmp_names = array('1' => 'lldpRemTimeMark',
+		                    '2' => 'lldpRemLocalPortNum',
+		                    '3' => 'lldpRemIndex',
+		                    '4' => 'lldpRemChassisIdSubtype',
+		                    '5' => 'lldpRemChassisId',
+		                    '6' => 'lldpRemPortIdSubtype',
+		                    '7' => 'lldpRemPortId',
+		                    '8' => 'lldpRemPortDesc',
+		                    '9' => 'lldpRemSysName',
+		                    '10' => 'lldpRemSysDesc',
+		                    '11' => 'lldpRemSysCapSupported',
+		                    '12' => 'lldpRemSysCapEnabled');
+
+		@snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
+
+		$walk_data = @snmprealwalk($this->host, $this->community, '1.0.8802.1.1.2.1.4.1.1');
+		foreach ($walk_data as $oid => $val) {
+			// TODO: Multiple devices can appear per port.
+			//       the \.1 needs to be less-specific here.
+			if (preg_match('#\.8802\.1\.1\.2\.1\.4\.1\.1\.([0-9]+)\.0\.([0-9]+)\.([0-9]+)#', $oid, $m)) {
+				$memberID = $m[3];
+				$portID = $m[2];
+				$oidName = $snmp_names[$m[1]];
+
+				if (!isset($result['ports'][$portID])) { $result['ports'][$portID] = array('devices' => array()); }
+				if (!isset($result['ports'][$portID]['devices'][$memberID])) { $result['ports'][$portID]['devices'][$memberID] = array(); }
+
+				$result['ports'][$portID]['devices'][$memberID][$oidName] = $val;
+			}
+		}
+
+		$walk_desc = @snmprealwalk($this->host, $this->community, '1.0.8802.1.1.2.1.3.7.1.4');
+		foreach ($walk_desc as $oid => $val) {
+			if (preg_match('#\.8802\.1\.1\.2\.1\.3\.7\.1\.4\.([0-9]+)#', $oid, $m)) {
+				$portID = $m[1];
+				if (isset($result['ports'][$portID])) {
+					$result['ports'][$portID]['lldpLocPortDesc'] = $val;
+				}
+			}
+		}
+
+		$walk_name = @snmprealwalk($this->host, $this->community, '1.3.6.1.2.1.31.1.1.1.18');
+		foreach ($walk_name as $oid => $val) {
+			if (preg_match('#1\.3\.6\.1\.2\.1\.31\.1\.1\.1\.18\.([0-9]+)#', $oid, $m)) {
+				$portID = $m[1];
+				if (isset($result['ports'][$portID])) {
+					$result['ports'][$portID]['ifAlias'] = $val;
+				}
+			}
+		}
+
+		$walk_remaddr = @snmprealwalk($this->host, $this->community, '1.0.8802.1.1.2.1.4.2.1.3.0');
+		foreach ($walk_remaddr as $oid => $val) {
+			if (preg_match('#\.8802\.1\.1\.2\.1\.4\.2\.1\.3\.0\.([0-9]+)\.([0-9]+)\.1.4.([0-9.]+)#', $oid, $m)) {
+				$portID = $m[1];
+				$memberID = $m[2];
+
+				if (isset($result['ports'][$portID])) {
+					$result['ports'][$portID]['devices'][$memberID]['lldpRemManAddr'] = $m[3];
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Find a given MAC address on this switch.
 	 *
 	 * @param $mac Mac address (In any industry-accepted format).
