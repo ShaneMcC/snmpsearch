@@ -87,11 +87,13 @@ class SNMPSwitch {
 
 		$result['calculateddesc'] = $result['desc'];
 
+		// 161 == ieee8023adLag
+		// 53 == propVirtual
+		// 54 == propMultiplexor
 		if ($result['type'] == 161 || $result['type'] == 53 || $result['type'] == 54) {
 			// Virtual Ports, Multiplexor ports or LACP Ports.
 			// Get any data we can get about them.
 
-			// Lets look for LACP member ports first.
 			$result['lacpmembers'] = @snmpget($this->host, $this->community, '1.2.840.10006.300.43.1.1.2.1.1.'.$portid);
 			if (empty($result['lacpmembers'])) {
 				unset($result['lacpmembers']);
@@ -100,7 +102,7 @@ class SNMPSwitch {
 				$result['lacpmembers'] = $this->hex2ports($result['lacpmembers']);
 				foreach ($result['lacpmembers'] as &$member) {
 					$member = $this->getPortDetails($member);
-					if (empty($result['calculateddesc'])) { $result['calculateddesc'] = $member['desc']; }
+					if (!empty($member['desc'])) { $result['calculateddesc'] = $info['desc']; }
 				}
 			}
 
@@ -112,7 +114,7 @@ class SNMPSwitch {
 					$p = str_replace('.1.3.6.1.2.1.31.1.2.1.3.'.$portid.'.', '', $key);
 					$info = $this->getPortDetails($p);
 					$result['stackmembers'][] = $info;
-					if (empty($result['calculateddesc'])) { $result['calculateddesc'] = $info['desc']; }
+					if (!empty($info['desc'])) { $result['calculateddesc'] = $info['desc']; }
 				}
 			}
 			if (empty($result['stackmembers'])) {
