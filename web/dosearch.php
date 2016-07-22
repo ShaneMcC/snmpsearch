@@ -43,7 +43,7 @@
 
 		if ($result !== false) {
 			$result[1] = join(':', str_split($result[1], 2));
-			echo 'Found MAC Address ', $result[1], ' for IP ', $mac, ' on ', $result[0], '<br>';
+			echo '<span class="meh" style="font-style: italic">Found MAC Address <strong>', $result[1], '</strong> for IP <strong>', $mac, '</strong> on <strong>', $result[0], '</strong></span><br>';
 			$mac = $result[1];
 		} else {
 			$mac = FALSE;

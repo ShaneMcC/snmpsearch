@@ -85,3 +85,7 @@ span.yes {
 span.no {
 	color: #500;
 }
+
+span.meh {
+	color: #AAA;
+}
