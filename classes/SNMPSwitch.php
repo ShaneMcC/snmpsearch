@@ -37,7 +37,7 @@ class SNMPSwitch {
 	 * @return True or False.
 	 */
 	private function isValidMac($mac) {
-		return preg_match('/^([a-fA-F0-9]{2}[:|\-|\.]?){6}$/', $mac);
+		return preg_match('/^([A-F0-9]{2}[:|\-|\.]?){6}$/i', $mac);
 	}
 
 	/**
