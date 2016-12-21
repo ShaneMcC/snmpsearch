@@ -10,3 +10,5 @@ You can then use `./macfinder.php <macaddress>` to find where the mac lives.
 Web interface
 ==========
 If you want to use the (basic) web interface, then you should create a new virtualhost on your webserver of choice with the `web` folder as the document root, and then run `git submodule update --init`. No more configuration is required.
+
+![Screenshot](/screenshot.png?raw=true "Screenshot")
