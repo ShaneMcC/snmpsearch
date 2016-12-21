@@ -25,11 +25,19 @@ class SNMPSwitch {
 	/**
 	 * Check if a given mac address looks valid.
 	 *
+	 * Matches anything that probably looks like a MAC address:
+	 * - aa:aa:aa:aa:aa:aa
+	 * - aa-aa-aa-aa-aa-aa
+	 * - aa.aa.aa.aa.aa.aa
+	 * - aaaa.aaaa.aaaa
+	 * - aaaaaa-aaaaaa
+	 * - aaaaaaaaaaaa
+	 *
 	 * @param $mac mac to check
 	 * @return True or False.
 	 */
 	private function isValidMac($mac) {
-		return preg_match('/^([a-fA-F0-9]{2}[:|\-|\.]?){6}$/', $mac) || preg_match('/^([a-fA-F0-9]{4}[\.]?){3}$/', $mac);
+		return preg_match('/^([a-fA-F0-9]{2}[:|\-|\.]?){6}$/', $mac);
 	}
 
 	/**
